@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servite - Serviços</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
+        header { background: #4a90e2; color: #fff; padding: 1rem 2rem; }
+        nav a { color: #fff; margin-right: 1rem; text-decoration: none; font-weight: bold; }
+        main { padding: 2rem; max-width: 900px; margin: auto; }
+        h1 { margin-bottom: 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+        th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
+        th { background: #eee; }
+        form { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem; }
+        input, textarea, select, button { padding: 0.5rem; border-radius: 0.3rem; border: 1px solid #ccc; }
+        button { background: #4a90e2; color: #fff; border: none; cursor: pointer; }
+        button:hover { background: #357ABD; }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Servite</h2>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="agendamento.html">Agendamentos</a>
+            <a href="servicos.html">Serviços</a>
+            <a href="chat.html">Chat</a>
+            <a href="avaliacao.html">Avaliações</a>
+        </nav>
+    </header>
+    <main>
+        <h1>Serviços</h1>
+
+        <form id="formServico">
+            <h3>Novo Serviço</h3>
+            <input type="number" id="prestador_id" placeholder="ID do Prestador" required>
+            <input type="text" id="descricao" placeholder="Descrição do serviço" required>
+            <input type="date" id="data_servico" required>
+            <button type="submit">Adicionar Serviço</button>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Prestador ID</th>
+                    <th>Descrição</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="listaServicos"></tbody>
+        </table>
+    </main>
+
+    <script>
+        const API_URL = './api/servicos.php';
+        const formServico = document.getElementById('formServico');
+        const listaServicos = document.getElementById('listaServicos');
+
+        async function carregarServicos() {
+            const res = await fetch(API_URL);
+            const dados = await res.json();
+            listaServicos.innerHTML = '';
+            dados.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${s.id}</td>
+                    <td>${s.prestador_id}</td>
+                    <td>${s.descricao}</td>
+                    <td>${s.data_servico}</td>
+                    <td>${s.status}</td>
+                    <td>
+                        <button onclick="editarServico(${s.id})">Editar</button>
+                        <button onclick="excluirServico(${s.id})">Excluir</button>
+                    </td>
+                `;
+                listaServicos.appendChild(tr);
+            });
+        }
+
+        formServico.addEventListener('submit', async e => {
+            e.preventDefault();
+            const prestador_id = parseInt(document.getElementById('prestador_id').value);
+            const descricao = document.getElementById('descricao').value;
+            const data_servico = document.getElementById('data_servico').value;
+
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prestador_id, descricao, data_servico })
+            });
+            const resp = await res.json();
+            if (res.ok) {
+                formServico.reset();
+                carregarServicos();
+            } else {
+                alert(resp.error || 'Erro ao criar serviço');
+            }
+        });
+
+        async function excluirServico(id) {
+            if (!confirm('Deseja realmente excluir este serviço?')) return;
+            const res = await fetch(`${API_URL}?id=${id}`, { method: 'DELETE' });
+            const resp = await res.json();
+            if (res.ok) carregarServicos();
+            else alert(resp.error || 'Erro ao excluir');
+        }
+
+        async function editarServico(id) {
+            const novaDescricao = prompt('Nova descrição:');
+            if (!novaDescricao) return;
+            const novaData = prompt('Nova data (AAAA-MM-DD):');
+            if (!novaData) return;
+            const res = await fetch(`${API_URL}?id=${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ descricao: novaDescricao, data_servico: novaData })
+            });
+            const resp = await res.json();
+            if (res.success) carregarServicos();
+            else alert(resp.error || 'Erro ao atualizar');
+        }
+
+        carregarServicos();
+    </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servite - Agendamentos</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
+        header { background: #4a90e2; color: #fff; padding: 1rem 2rem; }
+        nav a { color: #fff; margin-right: 1rem; text-decoration: none; font-weight: bold; }
+        main { padding: 2rem; max-width: 1000px; margin: auto; }
+        h1 { margin-bottom: 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+        th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
+        th { background: #eee; }
+        form { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem; background: #fff; padding: 1rem; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        input, select, button { padding: 0.5rem; border-radius: 0.3rem; border: 1px solid #ccc; }
+        button { background: #4a90e2; color: #fff; border: none; cursor: pointer; }
+        button:hover { background: #357ABD; }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Servite</h2>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="agendamento.html">Agendamentos</a>
+            <a href="servicos.html">Serviços</a>
+            <a href="chat.html">Chat</a>
+            <a href="avaliacao.html">Avaliações</a>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Agendamentos</h1>
+
+        <form id="formAgendamento">
+            <h3>Novo Agendamento</h3>
+            <input type="number" id="cliente_id" placeholder="ID do Cliente" required>
+            <input type="number" id="prestador_id" placeholder="ID do Prestador" required>
+            <select id="servico_id" required>
+                <option value="">Selecione o Serviço</option>
+            </select>
+            <input type="date" id="data_agendamento" required>
+            <input type="time" id="hora_agendamento" required>
+            <input type="number" id="valor" placeholder="Valor (R$)" step="0.01" required>
+            <button type="submit">Criar Agendamento</button>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Prestador</th>
+                    <th>Serviço</th>
+                    <th>Data/Hora</th>
+                    <th>Valor</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="listaAgendamentos"></tbody>
+        </table>
+    </main>
+
+    <script>
+        const API_AGENDAMENTO = './api/agendamento.php';
+        const API_SERVICO = './api/servico_produto.php';
+
+        const form = document.getElementById('formAgendamento');
+        const lista = document.getElementById('listaAgendamentos');
+        const selectServico = document.getElementById('servico_id');
+
+        async function carregarServicos() {
+            const res = await fetch(API_SERVICO);
+            const dados = await res.json();
+            selectServico.innerHTML = '<option value="">Selecione o Serviço</option>';
+            dados.forEach(s => {
+                selectServico.innerHTML += `<option value="${s.id}">${s.titulo} (Prestador ${s.prestador_id})</option>`;
+            });
+        }
+
+        async function carregarAgendamentos() {
+            const res = await fetch(API_AGENDAMENTO);
+            const dados = await res.json();
+            lista.innerHTML = '';
+            dados.forEach(a => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${a.id}</td>
+                    <td>${a.cliente_nome || a.cliente_id}</td>
+                    <td>${a.prestador_nome || a.prestador_id}</td>
+                    <td>${a.servico_titulo || a.servico_id}</td>
+                    <td>${a.data_agendamento} ${a.hora_agendamento}</td>
+                    <td>R$ ${a.valor}</td>
+                    <td>${a.status}</td>
+                    <td>
+                        <button onclick="editarAgendamento(${a.id})">Editar</button>
+                        <button onclick="excluirAgendamento(${a.id})">Excluir</button>
+                    </td>
+                `;
+                lista.appendChild(tr);
+            });
+        }
+
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+            const data = {
+                cliente_id: parseInt(document.getElementById('cliente_id').value),
+                prestador_id: parseInt(document.getElementById('prestador_id').value),
+                servico_id: parseInt(selectServico.value),
+                data_agendamento: document.getElementById('data_agendamento').value,
+                hora_agendamento: document.getElementById('hora_agendamento').value,
+                valor: parseFloat(document.getElementById('valor').value)
+            };
+
+            const res = await fetch(API_AGENDAMENTO, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const resp = await res.json();
+            if (res.ok) {
+                form.reset();
+                carregarAgendamentos();
+            } else {
+                alert(resp.error || 'Erro ao criar agendamento');
+            }
+        });
+
+        async function excluirAgendamento(id) {
+            if (!confirm('Deseja realmente excluir este agendamento?')) return;
+            const res = await fetch(`${API_AGENDAMENTO}?id=${id}`, { method: 'DELETE' });
+            const resp = await res.json();
+            if (res.ok) carregarAgendamentos();
+            else alert(resp.error || 'Erro ao excluir');
+        }
+
+        async function editarAgendamento(id) {
+            const novoStatus = prompt('Novo status (em análise, aceito, recusado, concluído):');
+            if (!novoStatus) return;
+            const novaData = prompt('Nova data (AAAA-MM-DD):');
+            const novaHora = prompt('Nova hora (HH:MM):');
+            const res = await fetch(`${API_AGENDAMENTO}?id=${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    status: novoStatus,
+                    data_agendamento: novaData,
+                    hora_agendamento: novaHora
+                })
+            });
+            const resp = await res.json();
+            if (resp.success) carregarAgendamentos();
+            else alert(resp.error || 'Erro ao atualizar');
+        }
+
+        carregarServicos();
+        carregarAgendamentos();
+    </script>
+</body>
+</html>

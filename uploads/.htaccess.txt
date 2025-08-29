@@ -1,0 +1,10 @@
+# uploads/.htaccess — protege uploads: permite arquivos estáticos, nega execução de scripts
+
+Options -Indexes
+
+# negar execução de scripts
+<FilesMatch "\.(php|phtml|phar|pl|py|sh)$">
+  Require all denied
+</FilesMatch>
+
+# permitir leitura de imagens e arquivos estáticos por padrão (sem regras adicionais necessárias)

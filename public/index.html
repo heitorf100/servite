@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servite - Home</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Reset e estilo básico */
+        * { box-sizing: border-box; margin:0; padding:0; font-family: Arial, sans-serif; }
+        body { background: #f5f5f5; color:#333; }
+        header { background: #4a90e2; color: #fff; padding: 1rem 2rem; }
+        nav a { color: #fff; margin-right: 1rem; text-decoration: none; font-weight: bold; }
+        main { padding: 2rem; }
+        h1 { margin-bottom: 1rem; }
+        .cards { display: flex; flex-wrap: wrap; gap: 1rem; }
+        .card { background: #fff; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex: 1 1 200px; text-align: center; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .card a { display: block; margin-top: 1rem; color: #4a90e2; text-decoration: none; font-weight: bold; }
+        footer { margin-top: 2rem; text-align: center; padding: 1rem; color: #777; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Servite</h2>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="agendamento.html">Agendamentos</a>
+            <a href="servicos.html">Serviços</a>
+            <a href="chat.html">Chat</a>
+            <a href="avaliacao.html">Avaliações</a>
+        </nav>
+    </header>
+    <main>
+        <h1>Bem-vindo ao Servite</h1>
+        <p>Conectando clientes a prestadores de serviços de forma fácil e rápida.</p>
+        <div class="cards">
+            <div class="card">
+                <h3>Agendar Serviço</h3>
+                <p>Crie novos agendamentos ou veja os seus agendamentos ativos.</p>
+                <a href="agendamento.html">Ir para Agendamentos</a>
+            </div>
+            <div class="card">
+                <h3>Serviços</h3>
+                <p>Explore os serviços disponíveis e encontre prestadores próximos.</p>
+                <a href="servicos.html">Ver Serviços</a>
+            </div>
+            <div class="card">
+                <h3>Chat</h3>
+                <p>Comunique-se diretamente com prestadores sobre seus agendamentos.</p>
+                <a href="chat.html">Abrir Chat</a>
+            </div>
+            <div class="card">
+                <h3>Avaliações</h3>
+                <p>Veja e avalie prestadores após realizar serviços.</p>
+                <a href="avaliacao.html">Ver Avaliações</a>
+            </div>
+        </div>
+    </main>
+    <footer>
+        &copy; 2025 Servite. Todos os direitos reservados.
+    </footer>
+</body>
+</html>

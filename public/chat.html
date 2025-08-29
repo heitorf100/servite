@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servite - Chat</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
+        header { background: #4a90e2; color: #fff; padding: 1rem 2rem; }
+        nav a { color: #fff; margin-right: 1rem; text-decoration: none; font-weight: bold; }
+        main { padding: 2rem; max-width: 800px; margin: auto; }
+        h1 { margin-bottom: 1rem; }
+        #chatContainer { background: #fff; border-radius: 0.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 1rem; display: flex; flex-direction: column; height: 500px; }
+        #mensagens { flex: 1; overflow-y: auto; margin-bottom: 1rem; border: 1px solid #ddd; padding: 0.5rem; border-radius: 0.3rem; }
+        .mensagem { margin-bottom: 0.5rem; padding: 0.5rem; border-radius: 0.3rem; }
+        .cliente { background: #e0f7fa; align-self: flex-start; }
+        .prestador { background: #ffe0b2; align-self: flex-end; }
+        #formMensagem { display: flex; gap: 0.5rem; }
+        #formMensagem input { flex: 1; padding: 0.5rem; border-radius: 0.3rem; border: 1px solid #ccc; }
+        #formMensagem button { padding: 0.5rem 1rem; background: #4a90e2; color: #fff; border: none; border-radius: 0.3rem; cursor: pointer; }
+        #formMensagem button:hover { background: #357ABD; }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Servite</h2>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="agendamento.html">Agendamentos</a>
+            <a href="servicos.html">Serviços</a>
+            <a href="chat.html">Chat</a>
+            <a href="avaliacao.html">Avaliações</a>
+        </nav>
+    </header>
+    <main>
+        <h1>Chat do Agendamento</h1>
+
+        <div>
+            <label for="agendamento_id">ID do Agendamento:</label>
+            <input type="number" id="agendamento_id" placeholder="Digite o ID e pressione Enter">
+        </div>
+
+        <div id="chatContainer" style="display:none;">
+            <div id="mensagens"></div>
+            <form id="formMensagem">
+                <input type="text" id="conteudo" placeholder="Digite sua mensagem" required>
+                <button type="submit">Enviar</button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        const agendamentoInput = document.getElementById('agendamento_id');
+        const chatContainer = document.getElementById('chatContainer');
+        const mensagensDiv = document.getElementById('mensagens');
+        const formMensagem = document.getElementById('formMensagem');
+        const conteudoInput = document.getElementById('conteudo');
+        let agendamento_id = null;
+        const API_URL = './api/mensagem.php';
+
+        async function carregarMensagens() {
+            if (!agendamento_id) return;
+            const res = await fetch(`${API_URL}?agendamento_id=${agendamento_id}&limit=100`);
+            const dados = await res.json();
+            mensagensDiv.innerHTML = '';
+            dados.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'mensagem ' + (m.cliente_id ? 'cliente' : 'prestador');
+                div.textContent = `[${m.data_hora}] ${m.cliente_nome || m.prestador_nome}: ${m.conteudo}`;
+                mensagensDiv.appendChild(div);
+            });
+            mensagensDiv.scrollTop = mensagensDiv.scrollHeight;
+        }
+
+        agendamentoInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                agendamento_id = parseInt(agendamentoInput.value);
+                if (!isNaN(agendamento_id)) {
+                    chatContainer.style.display = 'flex';
+                    carregarMensagens();
+                }
+            }
+        });
+
+        formMensagem.addEventListener('submit', async e => {
+            e.preventDefault();
+            if (!agendamento_id) return alert('Informe o ID do agendamento primeiro.');
+            
+            const data = {
+                agendamento_id,
+                cliente_id: 1, // Ajuste para pegar usuário logado
+                prestador_id: 1, // Ajuste para prestador, caso aplicável
+                conteudo: conteudoInput.value
+            };
+
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            const resp = await res.json();
+            if (res.ok) {
+                conteudoInput.value = '';
+                carregarMensagens();
+            } else {
+                alert('Erro: ' + (resp.error || 'Desconhecido'));
+            }
+        });
+
+        // Atualiza chat a cada 5 segundos
+        setInterval(carregarMensagens, 5000);
+    </script>
+</body>
+</html>

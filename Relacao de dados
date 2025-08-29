@@ -1,0 +1,62 @@
+                 ┌────────────┐
+                 │   usuario  │
+                 │ id         │
+                 │ nome       │
+                 │ ...        │
+                 └─────┬──────┘
+                       │ 1
+                       │
+                       │
+          ┌────────────┴─────────────┐
+          │                          │
+     ┌────▼─────┐               ┌────▼─────┐
+     │ prestador│               │ endereco │
+     │ id       │               │ id       │
+     │ usuario_id◄──────────────┤usuario_id│
+     │ ...      │               │ ...      │
+     └────┬─────┘               └─────────┘
+          │
+          │ 1
+          │
+     ┌────▼────────────┐
+     │ servico_produto │
+     │ id              │
+     │ prestador_id◄───┘
+     │ tipo            │
+     │ titulo          │
+     │ ...             │
+     └────┬───────────┘
+          │
+          │ 1
+          │
+     ┌────▼─────────┐
+     │ agendamento  │
+     │ id           │
+     │ servico_id◄──┐
+     │ cliente_id◄──┘
+     │ prestador_id◄─┐
+     │ endereco_id◄──┘
+     │ status       │
+     │ data         │
+     │ hora         │
+     │ valor        │
+     └────┬─────────┘
+          │ 1
+          │
+    ┌─────▼─────┐       ┌─────────────┐
+    │ recebimento│       │ avaliacao   │
+    │ id         │       │ id          │
+    │ agendamento_id◄────┤agendamento_id│
+    │ status     │       │ nota        │
+    │ ...        │       │ comentario  │
+    └────────────┘       └─────────────┘
+
+    ┌─────────────┐
+    │  mensagem   │
+    │ id          │
+    │ agendamento_id◄───────────────┐
+    │ cliente_id  │                   │
+    │ prestador_id│                   │
+    │ conteudo    │                   │
+    └─────────────┘                   │
+                                      │

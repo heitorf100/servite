@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servite - Avaliações</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
+        header { background: #4a90e2; color: #fff; padding: 1rem 2rem; }
+        nav a { color: #fff; margin-right: 1rem; text-decoration: none; font-weight: bold; }
+        main { padding: 2rem; }
+        h1 { margin-bottom: 1rem; }
+        form { background: #fff; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 2rem; max-width: 600px; }
+        form div { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.3rem; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 0.5rem; border-radius: 0.3rem; border: 1px solid #ccc; }
+        textarea { resize: vertical; }
+        button { padding: 0.5rem 1rem; background: #4a90e2; color: #fff; border: none; border-radius: 0.3rem; cursor: pointer; }
+        button:hover { background: #357ABD; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 0.5rem; overflow: hidden; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #4a90e2; color: #fff; }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Servite</h2>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="agendamento.html">Agendamentos</a>
+            <a href="servicos.html">Serviços</a>
+            <a href="chat.html">Chat</a>
+            <a href="avaliacao.html">Avaliações</a>
+        </nav>
+    </header>
+    <main>
+        <h1>Avaliações</h1>
+
+        <form id="formAvaliacao">
+            <h2>Nova Avaliação</h2>
+            <div>
+                <label for="agendamento_id">ID do Agendamento:</label>
+                <input type="number" id="agendamento_id" required>
+            </div>
+            <div>
+                <label for="nota">Nota (0 a 10):</label>
+                <input type="number" id="nota" min="0" max="10" required>
+            </div>
+            <div>
+                <label for="comentario">Comentário:</label>
+                <textarea id="comentario" rows="3"></textarea>
+            </div>
+            <button type="submit">Enviar Avaliação</button>
+        </form>
+
+        <h2>Avaliações Recentes</h2>
+        <table id="tabelaAvaliacoes">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Prestador</th>
+                    <th>Agendamento</th>
+                    <th>Nota</th>
+                    <th>Comentário</th>
+                    <th>Data</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </main>
+
+    <script>
+        const form = document.getElementById('formAvaliacao');
+        const tabelaBody = document.querySelector('#tabelaAvaliacoes tbody');
+        const API_URL = './api/avaliacao.php';
+
+        // Carregar avaliações
+        async function carregarAvaliacoes() {
+            const res = await fetch(API_URL);
+            const dados = await res.json();
+            tabelaBody.innerHTML = '';
+            dados.forEach(a => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${a.id}</td>
+                    <td>${a.cliente_nome || a.cliente_id}</td>
+                    <td>${a.prestador_nome || a.prestador_usuario_id}</td>
+                    <td>${a.agendamento_id}</td>
+                    <td>${a.nota}</td>
+                    <td>${a.comentario || ''}</td>
+                    <td>${a.data_avaliacao}</td>
+                `;
+                tabelaBody.appendChild(tr);
+            });
+        }
+
+        // Submissão do formulário
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+            const data = {
+                agendamento_id: parseInt(document.getElementById('agendamento_id').value),
+                nota: parseInt(document.getElementById('nota').value),
+                comentario: document.getElementById('comentario').value
+            };
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const resp = await res.json();
+            if (res.ok) {
+                alert('Avaliação enviada com sucesso! ID: ' + resp.id);
+                form.reset();
+                carregarAvaliacoes();
+            } else {
+                alert('Erro: ' + (resp.error || 'Desconhecido'));
+            }
+        });
+
+        // Carregar avaliações ao abrir a página
+        carregarAvaliacoes();
+    </script>
+</body>
+</html>

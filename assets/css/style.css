@@ -1,0 +1,11 @@
+body{font-family:Segoe UI,Arial,Helvetica,sans-serif;background:#f6f8fa;color:#111;margin:0;padding:20px}
+.wrap{max-width:900px;margin:0 auto}
+.card{background:#fff;border:1px solid #e6e9ee;padding:16px;border-radius:8px;margin-bottom:16px}
+label{display:block;margin-bottom:8px}
+input,select{width:100%;padding:8px;border-radius:6px;border:1px solid #ddd}
+.actions{margin-top:10px}
+button{padding:8px 12px;border-radius:6px;border:0;background:#2563eb;color:#fff;cursor:pointer}
+#list table{width:100%;border-collapse:collapse}
+#list th,#list td{padding:8px;border-bottom:1px solid #eee;text-align:left}
+.muted{color:#6b7280;font-size:13px}
+    
